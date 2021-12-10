@@ -1,6 +1,6 @@
 # Jenkins
 
-Jenkins installation with master and one slave-node. The pipelines download, build and deploy applications [hello](../hello) and [cpu-load](../cpu-load) to [Kubrernetes](../k8s) cluster. Pipelines runs automatically when a new commit pushes in the master branch (via Github-webhooks).
+Jenkins installation with master and one slave-node. The pipelines download, build and deploy applications [hello](https://github.com/morion-devops/hello) and [cpu-load](https://github.com/morion-devops/cpu-load) to [Kubrernetes](https://github.com/morion-devops/kubernetes) cluster. Pipelines runs automatically when a new commit pushes in the master branch (via Github-webhooks).
 
 Installation and configure take place in three stages:
 
