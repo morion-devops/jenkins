@@ -1,0 +1,3 @@
+[submodule "roles"]
+	path = roles
+	url = https://github.com/morion-devops/ansible_shared_roles.git

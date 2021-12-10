@@ -1,0 +1,66 @@
+---
+
+- name: playbook-jenkins
+  hosts: group_jenkins
+
+  vars:
+      user_name: vagrant
+      group_name: vagrant
+
+  #########
+  # roles #
+  #########
+  roles: 
+    
+    - role: set-timezone
+
+    - role: jre-install
+
+    - role: git-install
+
+    - role: docker-install
+      when: inventory_hostname in groups['group_jenkins_nodes']
+
+    - role: docker-insecure-registry
+      when: inventory_hostname in groups['group_jenkins_nodes']
+
+    - role: kubectl-install
+      when: inventory_hostname in groups['group_jenkins_nodes']
+
+    - role: gpg-install
+      when: inventory_hostname in groups['group_jenkins_master']
+
+  #########
+  # tasks #
+  #########
+  tasks:
+
+    - block: # Prepare jenkins-master
+      - name: Add jenkins key
+        ansible.builtin.apt_key:
+          url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+          state: present
+
+      - name: Add jenkins repository
+        ansible.builtin.apt_repository:
+          repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+          state: present
+          update_cache: true
+
+      - name: Install Jenkins
+        ansible.builtin.apt:
+          name: jenkins
+          state: present
+
+      when: inventory_hostname in groups['group_jenkins_master']
+      become: true
+
+    - block: # Prepare jenkins-nodes
+      - name: create workdir
+        ansible.builtin.file:
+          state: directory
+          path: '/home/{{ user_name }}/jenkins_workdir'
+          owner: '{{ user_name }}'
+          group: '{{ group_name }}'
+
+      when: inventory_hostname in groups['group_jenkins_nodes']
