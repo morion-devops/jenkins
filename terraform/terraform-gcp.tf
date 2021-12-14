@@ -46,8 +46,11 @@ resource "google_compute_instance" "jenkins-master" {
   tags = ["http-server"]
 
   network_interface {
-    network = "default"
-    access_config {} // for external ip
+    network = "default"    
+    access_config {
+      nat_ip = google_compute_address.jenkins-master.address
+      network_tier = "STANDARD"
+    }
   }
 }
 
@@ -74,6 +77,18 @@ resource "google_compute_instance" "jenkins-node1" {
 
   network_interface {
     network = "default"
-    access_config {} // for external ip
+    access_config {
+      network_tier = "STANDARD"
+    }
   }
+}
+
+#############
+# addresses #
+#############
+resource "google_compute_address" "jenkins-master" {
+  region       = "europe-north1"
+  name         = "jenkins-master"
+  address_type = "EXTERNAL"
+  network_tier = "STANDARD"
 }
