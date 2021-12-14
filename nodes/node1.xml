@@ -2,7 +2,6 @@
 <slave>
   <name>node1</name>
   <description>Node for docker builder</description>
-  <remoteFS>/home/vagrant/jenkins_workdir</remoteFS>
   <numExecutors>1</numExecutors>
   <mode>NORMAL</mode>
   <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
