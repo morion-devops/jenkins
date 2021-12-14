@@ -1,3 +1,7 @@
 *.jar
 .vagrant
 .directory
+.terraform
+terraform.tfstate*
+*.lock.hcl
+credentials/.gcp*

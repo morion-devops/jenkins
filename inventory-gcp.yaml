@@ -1,0 +1,21 @@
+plugin: gcp_compute
+
+projects:
+  - "prefab-poetry-334607"
+
+regions:
+  - "europe-north1"
+
+# hostnames:
+#   - name
+
+filters:
+   - "labels.service_name = jenkins"
+
+groups:
+  group_jenkins: "labels['service_name'] == 'jenkins'"
+  group_jenkins_master: "labels['service_name'] == 'jenkins' and labels['service_role'] == 'master'"
+  group_jenkins_nodes: "labels['service_name'] == 'jenkins' and labels['service_role'] == 'node'"
+
+auth_kind: serviceaccount
+service_account_file: credentials/.gcp-creds.json

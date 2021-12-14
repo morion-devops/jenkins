@@ -3,9 +3,9 @@
 - name: playbook-jenkins
   hosts: group_jenkins
 
-  vars:
-      user_name: vagrant
-      group_name: vagrant
+  # vars:
+  #     user_name: vagrant
+  #     group_name: vagrant
 
   #########
   # roles #
@@ -59,8 +59,8 @@
       - name: create workdir
         ansible.builtin.file:
           state: directory
-          path: '/home/{{ user_name }}/jenkins_workdir'
-          owner: '{{ user_name }}'
-          group: '{{ group_name }}'
+          path: '/home/{{ ansible_ssh_user }}/jenkins_workdir'
+          owner: '{{ ansible_ssh_user }}'
+          group: '{{ ansible_ssh_user }}'
 
       when: inventory_hostname in groups['group_jenkins_nodes']
