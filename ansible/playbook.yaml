@@ -11,8 +11,11 @@
   # roles #
   #########
   roles: 
-    
+
     - role: set-timezone
+
+    - role: iptables-8080-to-80
+      when: inventory_hostname in groups['group_jenkins_master']
 
     - role: jre-install
 
