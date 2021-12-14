@@ -18,4 +18,4 @@ groups:
   group_jenkins_nodes: "labels['service_name'] == 'jenkins' and labels['service_role'] == 'node'"
 
 auth_kind: serviceaccount
-service_account_file: credentials/.gcp-creds.json
+service_account_file: ../credentials/.gcp-creds.json
