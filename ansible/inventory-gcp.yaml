@@ -6,8 +6,12 @@ projects:
 regions:
   - "europe-north1"
 
-# hostnames:
-#   - name
+hostnames:
+  - name
+
+compose:
+  # for private_address
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
 
 filters:
    - "labels.service_name = jenkins"
