@@ -4,9 +4,9 @@
 provider "google" {
   credentials = file("../credentials/.gcp-creds.json")
 
-  project = "prefab-poetry-334607"
-  region  = "europe-north1"
-  zone    = "europe-north1-a"
+  project = "${var.GCP_PROJECT}"
+  region  = "${var.GCP_REGION}"
+  zone    = "${var.GCP_ZONE}"
 }
 
 #############
@@ -18,6 +18,18 @@ variable "ssh_key_file_name" {
 
 variable "ssh_user_name" {
   default = "gcp_jenkins"
+}
+
+variable "GCP_ZONE" {
+  type = string
+}
+
+variable "GCP_REGION" {
+  type = string
+}
+
+variable "GCP_PROJECT" {
+  type = string
 }
 
 #############

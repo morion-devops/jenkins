@@ -3,9 +3,8 @@
 - name: playbook-jenkins
   hosts: group_jenkins
 
-  # vars:
-  #     user_name: vagrant
-  #     group_name: vagrant
+  vars:
+    REGISTRY_ADDRESS: "{{ lookup('env', 'REGISTRY_ADDRESS') }}"
 
   #########
   # roles #
