@@ -13,6 +13,8 @@
 
     - role: set-timezone
 
+    - role: update-apt-cache
+
     - role: iptables-8080-to-80
       when: inventory_hostname in groups['group_jenkins_master']
 
