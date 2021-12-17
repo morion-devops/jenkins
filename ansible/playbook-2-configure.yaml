@@ -1,0 +1,134 @@
+---
+
+- name: playbook-jenkins
+  hosts: group_jenkins
+
+  vars:
+    REGISTRY_ADDRESS: "{{ lookup('env', 'REGISTRY_ADDRESS') }}"
+    JENKINS_USER_ID: "{{ lookup('env', 'JENKINS_USER_ID') }}"
+    JENKINS_API_TOKEN: "{{ lookup('env', 'JENKINS_API_TOKEN') }}"
+    JENKINS_URL: "{{ lookup('env', 'JENKINS_URL') }}"
+
+  #########
+  # tasks #
+  #########
+  tasks:
+
+    - block: 
+
+      - name: Create temp-dir
+        ansible.builtin.tempfile:
+          state: directory
+        register: tempdir
+        # delegate_to: localhost
+
+      - name: Download CLI
+        ansible.builtin.get_url:
+          url: "{{ JENKINS_URL}}/jnlpJars/jenkins-cli.jar"
+          dest: "{{ tempdir.path }}"
+
+      - name: Install plugins
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar install-plugin ssh-credentials ws-cleanup git github ssh-slaves -restart"
+
+      - name: Wait until restart
+        ansible.builtin.pause:
+          seconds: 20
+          prompt: "Because Jenkins WILL hang after install plugins and restart on Debian 11 (https://issues.jenkins.io/browse/JENKINS-24238), we need restart the systemd-service.\r\n\
+            But before we will wait 20 seconds ..."
+
+      - name: restart jenkins serivce
+        become: true
+        ansible.builtin.service:
+          name: jenkins
+          state: restarted
+        delegate_to: jenkins-master
+
+      - name: Wait until start
+        ansible.builtin.pause:
+          seconds: 20
+          prompt: "Now we wait until jenkins started ..."
+
+      ###############
+      # credentials #
+      ###############
+      - name: check if credeitial exist
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} get-credentials-as-xml system::system::jenkins _ {{ item }}"
+        loop:
+          - "registry"
+          - "ssh-key-github"
+          - "ssh-key-node1"
+        register: creds
+        ignore_errors: yes
+
+      - name: Copy templates (credentials)
+        ansible.builtin.template:
+          src: "credentials/{{ item.item }}.xml"
+          dest: "{{ tempdir.path }}"
+        loop: "{{ creds.results }}"
+        when: item.stderr.find('No such credential') != -1
+
+      - name: Apply template (credentials)
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} create-credentials-by-xml system::system::jenkins _ < {{ tempdir.path }}/{{ item.item }}.xml"
+        loop: "{{ creds.results }}"
+        when: item.stderr.find('No such credential') != -1
+
+      - name: Wait until configure credentials
+        ansible.builtin.pause:
+          prompt: "If credentials was created first time, you should configure them. \r\n
+            At least you should configure first credentials (ssh-key-node1) before continue. But also recommended configure another too at the time:\r\n
+            - {{ JENKINS_URL }}/credentials/store/system/domain/_/credential/ssh-key-node1/update\r\n
+            - {{ JENKINS_URL }}/credentials/store/system/domain/_/credential/registry/update\r\n
+            - {{ JENKINS_URL }}/credentials/store/system/domain/_/credential/ssh-key-github/update\r\n
+            Press [Enter] when you finished"
+
+      ########
+      # node #
+      ########
+      - name: check if node exist
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} get-node node1"
+        register: nodes
+        ignore_errors: yes
+
+      - name: Copy templates (node1)
+        ansible.builtin.template:
+          src: "nodes/node1.xml"
+          dest: "{{ tempdir.path }}"
+        when: nodes.stderr.find('No such node') != -1
+
+      - name: Apply template (node1)
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} create-node node1 < {{ tempdir.path }}/node1.xml"
+        when: nodes.stderr.find('No such node') != -1
+
+      ########
+      # jobs #
+      ########
+      - name: check if jobs exist
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} get-job {{ item }}"
+        loop:
+          - "hello-build"
+          - "hello-deploy"
+          - "cpu-load-build"
+          - "cpu-load-deploy"
+        register: jobs
+        ignore_errors: yes
+
+      - name: Copy templates (jobs)
+        ansible.builtin.template:
+          src: "jobs/{{ item.item }}.xml"
+          dest: "{{ tempdir.path }}"
+        loop: "{{ jobs.results }}"
+        when: item.stderr.find('No such job') != -1
+
+      - name: Apply template (jobs)
+        ansible.builtin.shell: "java -jar {{ tempdir.path }}/jenkins-cli.jar -s {{ JENKINS_URL }} \
+          -auth {{ JENKINS_USER_ID }}:{{ JENKINS_API_TOKEN }} create-job {{ item.item }} < {{ tempdir.path }}/{{ item.item }}.xml"
+        loop: "{{ jobs.results }}"
+        when: item.stderr.find('No such job') != -1
+      
+      when: inventory_hostname in groups['group_jenkins_master']
+      delegate_to: localhost

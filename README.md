@@ -11,7 +11,7 @@ Part of my [devops portfolio](https://morion-devops.github.io/).
 1. Apply it: `source .env`
 1. Run `terraform apply` or `vagrant up` in appropriate directory depending on your provisioning way
 1. Check `ansible/ansible.cfg` file and uncomment lines for GCP or Vagrant
-1. Run `ansible-playbook playbook.yaml` in ansible directory
+1. Run `ansible-playbook playbook-1-install.yaml` in ansible directory
 
 ## Configure after provisioning:
 
@@ -27,39 +27,6 @@ Part of my [devops portfolio](https://morion-devops.github.io/).
 
 1. Apply it: `source .env`
 
-1. Download CLI:
-
-    - `wget $JENKINS_URL/jnlpJars/jenkins-cli.jar`
-
-1. Install plugins:
-
-    - `java -jar jenkins-cli.jar install-plugin ssh-credentials ws-cleanup git github ssh-slaves -restart`
-
-1. Create templates for credentials:
-
-    - `java -jar jenkins-cli.jar -webSocket create-credentials-by-xml system::system::jenkins _ < credentials/ssh-key-github.xml`
-
-    - `java -jar jenkins-cli.jar -webSocket create-credentials-by-xml system::system::jenkins _ < credentials/ssh-key-node1.xml`
-
-    - `java -jar jenkins-cli.jar -webSocket create-credentials-by-xml system::system::jenkins _ < credentials/registry.xml`
-
-1. Configure credentials via web.
-
-1. Create node:
-
-    - `java -jar jenkins-cli.jar create-node node1 < nodes/node1.xml`
-
-1. Create tasks:
-
-    - `java -jar jenkins-cli.jar create-job hello-build < jobs/hello-build.xml`
-
-    - `java -jar jenkins-cli.jar create-job hello-deploy < jobs/hello-deploy.xml`
-
-    - `java -jar jenkins-cli.jar create-job cpu-load-build < jobs/cpu-load-build.xml`
-
-    - `java -jar jenkins-cli.jar create-job cpu-load-deploy < jobs/cpu-load-deploy.xml`
-
-## TODO
-
-1. Consider pipelines
-1. Use Ansible for more automation that is possible
+1. Run: `ansible-playbook playbook-2-configure.yaml`
+   
+   There are some intructions in playbook (it will wait until configure credentials), so follow this instructions

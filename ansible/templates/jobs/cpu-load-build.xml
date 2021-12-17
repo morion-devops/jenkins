@@ -1,11 +1,11 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build hello-app</description>
+  <description>Build cpu-load app</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.34.1">
-      <projectUrl>https://github.com/morion-devops/hello/</projectUrl>
+      <projectUrl>https://github.com/morion-devops/cpu-load/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <jenkins.model.BuildDiscarderProperty>
@@ -21,7 +21,7 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/morion-devops/hello</url>
+        <url>https://github.com/morion-devops/cpu-load</url>
         <credentialsId>ssh-key-github</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
@@ -47,11 +47,11 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>docker login -u $dr_user -p $dr_password 192.168.121.100:5000
+      <command>docker login -u $dr_user -p $dr_password {{ REGISTRY_ADDRESS }}
 
-docker build -t 192.168.121.100:5000/hello:latest .
+docker build -t {{ REGISTRY_ADDRESS }}/cpu-load:latest .
 
-docker push 192.168.121.100:5000/hello:latest
+docker push {{ REGISTRY_ADDRESS }}/cpu-load:latest
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>

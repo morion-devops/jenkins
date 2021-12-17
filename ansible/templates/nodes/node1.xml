@@ -2,21 +2,17 @@
 <slave>
   <name>node1</name>
   <description>Node for docker builder</description>
+  <remoteFS>/home/{{ ansible_ssh_user }}/jenkins_workdir</remoteFS>
   <numExecutors>1</numExecutors>
   <mode>NORMAL</mode>
   <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
   <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.33.0">
-    <host>192.168.121.101</host>
+    <host>{{ hostvars['jenkins-node1']['ansible_default_ipv4']['address'] }}</host>
     <port>22</port>
     <credentialsId>ssh-key-node1</credentialsId>
-    <launchTimeoutSeconds>60</launchTimeoutSeconds>
-    <maxNumRetries>10</maxNumRetries>
-    <retryWaitTime>15</retryWaitTime>
     <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.ManuallyTrustedKeyVerificationStrategy">
       <requireInitialManualTrust>false</requireInitialManualTrust>
     </sshHostKeyVerificationStrategy>
-    <tcpNoDelay>true</tcpNoDelay>
   </launcher>
   <label>debian docker kubectl</label>
-  <nodeProperties/>
 </slave>
